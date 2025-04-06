@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import type { PostgrestError } from '@supabase/supabase-js'
 
 export function ProjectForm() {
   const [title, setTitle] = useState('')
@@ -20,27 +21,62 @@ export function ProjectForm() {
     setError(null)
 
     try {
+      // First check if we can query the table structure
+      const { data: tableInfo, error: tableError } = await supabase
+        .from('projects')
+        .select('*')
+        .limit(1)
+
+      if (tableError) {
+        console.error('Table structure error:', tableError)
+        throw new Error(`Table error: ${tableError.message}`)
+      }
+
+      console.log('Current table structure:', tableInfo)
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
-      if (sessionError) throw sessionError
-      if (!session) throw new Error('Not authenticated')
+      if (sessionError) {
+        console.error('Session error:', sessionError)
+        throw new Error(sessionError.message)
+      }
+      
+      if (!session) {
+        throw new Error('Not authenticated')
+      }
 
-      const { error: projectError } = await supabase
+      // Log the exact data we're trying to insert
+      const projectData = {
+        title,
+        description,
+        user_id: session.user.id
+      }
+      console.log('Attempting to insert:', projectData)
+
+      const { data: insertedData, error: projectError } = await supabase
         .from('projects')
-        .insert([{ 
-          title,
-          description,
-          user_id: session.user.id
-        }])
+        .insert([projectData])
+        .select()
 
-      if (projectError) throw projectError
+      if (projectError) {
+        console.error('Project error:', projectError)
+        throw new Error(projectError.message)
+      }
+
+      console.log('Successfully inserted:', insertedData)
 
       setTitle('')
       setDescription('')
       router.refresh()
     } catch (err: unknown) {
-      console.error('Error:', err)
-      setError(err instanceof Error ? err.message : 'Error creating project')
+      console.error('Detailed error:', err)
+      if (err instanceof Error) {
+        setError(err.message)
+      } else if ((err as PostgrestError)?.message) {
+        setError((err as PostgrestError).message)
+      } else {
+        setError('Error creating project')
+      }
     } finally {
       setIsSubmitting(false)
     }
