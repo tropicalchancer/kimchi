@@ -1,7 +1,7 @@
 'use client'
 
-import Layout from '@/components/Layout'
+import { NavigationLayout } from '@/shared/components'
 
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <Layout>{children}</Layout>
+  return <NavigationLayout>{children}</NavigationLayout>
 } 

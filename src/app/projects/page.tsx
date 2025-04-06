@@ -1,19 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import ProjectList from '@/components/ProjectList'
-import ProjectForm from '@/components/ProjectForm'
+import { ProjectForm, ProjectList } from '@/features/projects'
 
-export default async function ProjectsPage() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { session } } = await supabase.auth.getSession()
-
+export default function ProjectsPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Projects</h1>
-        {session && <ProjectForm />}
-      </div>
+    <div className="space-y-8">
+      <ProjectForm />
       <ProjectList />
     </div>
   )

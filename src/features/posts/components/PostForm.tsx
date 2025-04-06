@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 
-export default function PostForm() {
+export function PostForm() {
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -19,7 +19,6 @@ export default function PostForm() {
     setError(null)
     
     try {
-      // Get the current user's session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       
       if (sessionError) {
@@ -34,7 +33,6 @@ export default function PostForm() {
 
       console.log('Current user:', session.user)
 
-      // Check if profile exists - don't use single() here
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -45,7 +43,6 @@ export default function PostForm() {
         throw profileError
       }
 
-      // Create profile if it doesn't exist
       if (!profiles || profiles.length === 0) {
         console.log('Creating new profile...')
         const { error: createProfileError } = await supabase
@@ -65,7 +62,6 @@ export default function PostForm() {
         console.log('New profile created')
       }
 
-      // Create post with user_id
       console.log('Creating post with:', { content, user_id: session.user.id })
       const { error: postError } = await supabase
         .from('posts')

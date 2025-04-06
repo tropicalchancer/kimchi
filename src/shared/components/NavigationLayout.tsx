@@ -5,7 +5,7 @@ import { HomeIcon, FolderIcon, UserIcon } from '@heroicons/react/24/outline'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export function NavigationLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const supabase = createClientComponentClient()
 

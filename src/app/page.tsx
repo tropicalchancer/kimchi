@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
-import PostForm from '@/components/PostForm'
-import PostList from '@/components/PostList'
+import { PostForm, PostList } from '@/features/posts'
 
 export default function HomePage() {
   const router = useRouter()
@@ -27,7 +26,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PostForm />
       <PostList />
     </div>
