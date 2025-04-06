@@ -1,41 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Project } from '@/shared/types/database'
 
-interface Project {
-  id: string
-  title: string
-  description: string
-  created_at: string
+interface ProjectListProps {
+  projects: Project[]
 }
 
-export function ProjectList() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const supabase = createClientComponentClient()
-  const router = useRouter()
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .returns<Project[]>()
-
-      if (error) {
-        console.error('Error fetching projects:', error)
-        return
-      }
-
-      setProjects(data || [])
-    }
-
-    fetchProjects()
-  }, [supabase, router])
-
+export function ProjectList({ projects }: ProjectListProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
