@@ -22,13 +22,29 @@ export default function HomePage() {
   }, [router, supabase.auth])
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-8">
-      <PostForm />
-      <PostList />
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Home Feed</h1>
+        <p className="text-gray-600">Share your thoughts or tag a project with #</p>
+      </div>
+
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <PostForm />
+        </div>
+        
+        <div className="divide-y divide-gray-100">
+          <PostList />
+        </div>
+      </div>
     </div>
   )
 }

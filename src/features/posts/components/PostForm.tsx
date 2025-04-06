@@ -100,56 +100,65 @@ export function PostForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow">
+    <form onSubmit={handleSubmit} className="p-4">
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg">
+        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
           {error}
         </div>
       )}
-      <div className="mb-4 relative">
-        <label htmlFor="content" className="sr-only">
-          What's on your mind?
-        </label>
+      <div className="relative">
         <textarea
           id="content"
           value={content}
           onChange={handleContentChange}
           placeholder="What's on your mind? Use # to tag a project"
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 resize-none"
           required
         />
         {showProjectAutocomplete && (
-          <ProjectAutocomplete
-            isOpen={showProjectAutocomplete}
-            searchText={projectSearchText}
-            onSelect={handleProjectSelect}
-            onClose={() => setShowProjectAutocomplete(false)}
-          />
-        )}
-      </div>
-      <div className="flex items-center justify-between">
-        {selectedProject && (
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Project:</span>
-            <span className="text-sm font-medium text-blue-600">
-              {selectedProject.title}
-            </span>
-            <button
-              type="button"
-              onClick={() => setSelectedProject(null)}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              ×
-            </button>
+          <div className="absolute left-0 right-0 mt-1 z-10">
+            <ProjectAutocomplete
+              isOpen={showProjectAutocomplete}
+              searchText={projectSearchText}
+              onSelect={handleProjectSelect}
+              onClose={() => setShowProjectAutocomplete(false)}
+            />
           </div>
         )}
+      </div>
+      
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2 min-h-[2rem]">
+          {selectedProject && (
+            <div className="flex items-center space-x-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
+              <span>{selectedProject.title}</span>
+              <button
+                type="button"
+                onClick={() => setSelectedProject(null)}
+                className="text-blue-500 hover:text-blue-600 focus:outline-none"
+              >
+                ×
+              </button>
+            </div>
+          )}
+        </div>
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? 'Posting...' : 'Post'}
+          {isSubmitting ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Posting...
+            </>
+          ) : (
+            'Post'
+          )}
         </button>
       </div>
     </form>
