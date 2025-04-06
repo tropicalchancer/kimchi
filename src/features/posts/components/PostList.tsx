@@ -3,11 +3,17 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import { PostContent } from './PostContent'
 
 interface Post {
   id: string
   content: string
   created_at: string
+  project_id: string | null
+  projects: {
+    id: string
+    title: string
+  } | null
   profiles: {
     username: string
     avatar_url: string | null
@@ -27,13 +33,31 @@ export function PostList() {
           id,
           content,
           created_at,
-          profiles:profiles (
+          project_id,
+          projects (
+            id,
+            title
+          ),
+          profiles (
             username,
             avatar_url
           )
         `)
         .order('created_at', { ascending: false })
-        .returns<Post[]>()
+        .returns<{
+          id: string
+          content: string
+          created_at: string
+          project_id: string | null
+          projects: {
+            id: string
+            title: string
+          } | null
+          profiles: {
+            username: string
+            avatar_url: string | null
+          }
+        }[]>()
 
       if (error) {
         console.error('Error fetching posts:', error)
@@ -77,7 +101,11 @@ export function PostList() {
             )}
             <span className="font-medium">{post.profiles.username}</span>
           </div>
-          <p className="text-gray-800">{post.content}</p>
+          <PostContent
+            content={post.content}
+            projectId={post.projects?.id}
+            projectTitle={post.projects?.title}
+          />
         </div>
       ))}
     </div>
