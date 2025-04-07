@@ -154,7 +154,7 @@ export function PostForm() {
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#D9361E] hover:bg-[#B22D19] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>
