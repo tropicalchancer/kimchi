@@ -11,7 +11,7 @@ interface ProjectListProps {
 export function ProjectList({ projects }: ProjectListProps) {
   if (projects.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-lg border border-gray-100">
+      <div className="p-4 text-center">
         <svg
           className="mx-auto h-12 w-12 text-gray-400"
           fill="none"
@@ -33,22 +33,22 @@ export function ProjectList({ projects }: ProjectListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div>
       {projects.map((project) => (
         <Link
           key={project.id}
           href={`/projects/${project.id}`}
-          className="block bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          className="block p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
         >
           <div className="flex items-center mb-4">
             {project.profiles.avatar_url ? (
               <img
                 src={project.profiles.avatar_url}
                 alt={project.profiles.username}
-                className="h-8 w-8 rounded-full mr-3 border-2 border-white shadow-sm"
+                className="h-8 w-8 rounded-full mr-3"
               />
             ) : (
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 mr-3 flex items-center justify-center text-blue-600 font-medium border-2 border-white shadow-sm">
+              <div className="h-8 w-8 rounded-full bg-gray-100 mr-3 flex items-center justify-center text-gray-500 text-sm">
                 {project.profiles.username.charAt(0).toUpperCase()}
               </div>
             )}
@@ -67,7 +67,7 @@ export function ProjectList({ projects }: ProjectListProps) {
           </h3>
           <p className="text-gray-600 line-clamp-3">{project.description}</p>
 
-          <div className="mt-4 flex items-center text-sm text-blue-600">
+          <div className="mt-4 flex items-center text-sm text-[#D9361E]">
             <span>View project</span>
             <svg
               className="ml-2 h-4 w-4"
