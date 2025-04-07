@@ -80,13 +80,13 @@ export function PostList() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 animate-pulse">
+          <div key={i} className="p-4 bg-white animate-pulse">
             <div className="flex items-center mb-4">
-              <div className="h-10 w-10 rounded-full bg-gray-200 mr-3" />
+              <div className="h-8 w-8 rounded-full bg-gray-100 mr-3" />
               <div className="flex-1">
-                <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
+                <div className="h-4 w-24 bg-gray-100 rounded mb-2" />
                 <div className="h-3 w-16 bg-gray-100 rounded" />
               </div>
             </div>
@@ -102,7 +102,7 @@ export function PostList() {
 
   if (error) {
     return (
-      <div className="bg-red-50 p-4 rounded-lg text-red-700">
+      <div className="p-4 text-red-700 bg-white">
         {error}
       </div>
     )
@@ -110,25 +110,25 @@ export function PostList() {
 
   if (posts.length === 0) {
     return (
-      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100 text-center">
+      <div className="p-4 text-center bg-white">
         <p className="text-gray-500">No posts yet. Be the first to post!</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {posts.map((post) => (
-        <div key={post.id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+        <div key={post.id} className="p-4 bg-white">
           <div className="flex items-center mb-4">
             {post.profiles.avatar_url ? (
               <img
                 src={post.profiles.avatar_url}
                 alt={post.profiles.username}
-                className="h-10 w-10 rounded-full mr-3 border-2 border-white shadow-sm"
+                className="h-8 w-8 rounded-full mr-3"
               />
             ) : (
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 mr-3 flex items-center justify-center text-blue-600 font-medium border-2 border-white shadow-sm">
+              <div className="h-8 w-8 rounded-full bg-gray-100 mr-3 flex items-center justify-center text-gray-500 text-sm">
                 {post.profiles.username.charAt(0).toUpperCase()}
               </div>
             )}
@@ -139,7 +139,7 @@ export function PostList() {
               </div>
             </div>
           </div>
-          <div className="prose prose-blue max-w-none">
+          <div className="text-gray-900">
             <PostContent
               content={post.content}
               projectId={post.projects?.id}

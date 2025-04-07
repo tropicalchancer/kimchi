@@ -105,7 +105,7 @@ export function PostForm() {
   return (
     <form onSubmit={handleSubmit} className="p-4">
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 text-red-700 text-sm">
           {error}
         </div>
       )}
@@ -117,7 +117,7 @@ export function PostForm() {
             onChange={handleContentChange}
             placeholder="What did you get done?"
             rows={3}
-            className="block w-full rounded-lg border-0 pl-10 pr-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 resize-none"
+            className="block w-full border-0 pl-10 pr-4 py-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 resize-none"
             required
           />
           <div className="absolute left-4 top-3 text-gray-400 pointer-events-none">
@@ -139,12 +139,12 @@ export function PostForm() {
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-2 min-h-[2rem]">
           {selectedProject && (
-            <div className="flex items-center space-x-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm">
-              <span>{selectedProject.title}</span>
+            <div className="flex items-center space-x-2 text-blue-600 text-sm">
+              <span>#{selectedProject.title}</span>
               <button
                 type="button"
                 onClick={() => setSelectedProject(null)}
-                className="text-blue-500 hover:text-blue-600 focus:outline-none"
+                className="hover:text-blue-800 focus:outline-none"
               >
                 ×
               </button>
@@ -154,7 +154,7 @@ export function PostForm() {
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (
             <>
