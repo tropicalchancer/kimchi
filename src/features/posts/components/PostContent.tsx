@@ -37,5 +37,9 @@ export function PostContent({ content, projectId, projectTitle }: PostContentPro
     return content
   }, [content, projectId, projectTitle])
 
-  return <p className="text-gray-800">{renderedContent}</p>
+  return (
+    <p className="text-gray-800 whitespace-pre-wrap">
+      {renderedContent}
+    </p>
+  )
 } 

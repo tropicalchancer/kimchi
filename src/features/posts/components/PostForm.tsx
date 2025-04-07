@@ -75,10 +75,13 @@ export function PostForm() {
         throw new Error('Profile not found. Please try logging out and back in.')
       }
 
+      // Add checkmark emoji to the beginning of the content
+      const contentWithCheckmark = `✅ ${content.trim()}`
+
       const { error: postError } = await supabase
         .from('posts')
         .insert({
-          content: content.trim(),
+          content: contentWithCheckmark,
           user_id: session.user.id,
           project_id: selectedProject?.id || null
         })
@@ -107,15 +110,20 @@ export function PostForm() {
         </div>
       )}
       <div className="relative">
-        <textarea
-          id="content"
-          value={content}
-          onChange={handleContentChange}
-          placeholder="What's on your mind? Use # to tag a project"
-          rows={3}
-          className="block w-full rounded-lg border-0 px-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 resize-none"
-          required
-        />
+        <div className="relative">
+          <textarea
+            id="content"
+            value={content}
+            onChange={handleContentChange}
+            placeholder="What did you get done?"
+            rows={3}
+            className="block w-full rounded-lg border-0 pl-10 pr-4 py-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-500 resize-none"
+            required
+          />
+          <div className="absolute left-4 top-3 text-gray-400 pointer-events-none">
+            ✅
+          </div>
+        </div>
         {showProjectAutocomplete && (
           <div className="absolute left-0 right-0 mt-1 z-10">
             <ProjectAutocomplete
