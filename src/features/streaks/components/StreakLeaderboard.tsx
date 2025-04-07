@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { differenceInDays, isYesterday, isToday, parseISO } from 'date-fns'
+import { differenceInDays, parseISO, startOfDay } from 'date-fns'
 
 interface UserStreak {
   username: string
@@ -15,8 +15,8 @@ export function StreakLeaderboard() {
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClientComponentClient()
 
-  useEffect(() => {
-    async function calculateStreaks() {
+  const calculateStreaks = async () => {
+    try {
       // Get all users with their posts
       const { data: profiles } = await supabase
         .from('profiles')
@@ -35,13 +35,22 @@ export function StreakLeaderboard() {
           let streak = 0
           
           if (posts?.length) {
-            let lastPostDate = parseISO(posts[0].created_at)
+            const today = startOfDay(new Date())
+            const postDates = posts.map(post => startOfDay(parseISO(post.created_at)))
+            const uniqueDates = [...new Set(postDates.map(date => date.toISOString()))]
+              .map(dateStr => new Date(dateStr))
+              .sort((a, b) => b.getTime() - a.getTime())
 
-            if (isToday(lastPostDate) || isYesterday(lastPostDate)) {
+            let lastPostDate = uniqueDates[0]
+            const daysSinceLastPost = differenceInDays(today, lastPostDate)
+
+            // Streak is active if posted today or yesterday
+            if (daysSinceLastPost <= 1) {
               streak = 1
               
-              for (let i = 1; i < posts.length; i++) {
-                const currentDate = parseISO(posts[i].created_at)
+              // Count consecutive days backwards
+              for (let i = 1; i < uniqueDates.length; i++) {
+                const currentDate = uniqueDates[i]
                 const dayDiff = differenceInDays(lastPostDate, currentDate)
                 
                 if (dayDiff === 1) {
@@ -69,9 +78,29 @@ export function StreakLeaderboard() {
 
       setStreaks(sortedStreaks)
       setIsLoading(false)
+    } catch (error) {
+      console.error('Error calculating streaks:', error)
+      setIsLoading(false)
     }
+  }
 
+  useEffect(() => {
     calculateStreaks()
+
+    // Subscribe to new posts to update streaks
+    const channel = supabase
+      .channel('posts_channel')
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'posts' },
+        () => {
+          calculateStreaks()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   if (isLoading) {
