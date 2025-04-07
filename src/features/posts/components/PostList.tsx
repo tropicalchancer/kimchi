@@ -80,7 +80,7 @@ export function PostList() {
 
   if (isLoading) {
     return (
-      <div className="bg-white border border-gray-200">
+      <div>
         {[...Array(3)].map((_, i) => (
           <div key={i} className="p-4 animate-pulse border-b border-gray-200 last:border-b-0">
             <div className="flex items-center mb-4">
@@ -102,7 +102,7 @@ export function PostList() {
 
   if (error) {
     return (
-      <div className="p-4 text-red-700 bg-white border border-gray-200">
+      <div className="p-4 text-red-700">
         {error}
       </div>
     )
@@ -110,14 +110,14 @@ export function PostList() {
 
   if (posts.length === 0) {
     return (
-      <div className="p-4 text-center bg-white border border-gray-200">
+      <div className="p-4 text-center">
         <p className="text-gray-500">No posts yet. Be the first to post!</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-200">
+    <div>
       {posts.map((post) => (
         <div key={post.id} className="p-4 border-b border-gray-200 last:border-b-0">
           <div className="flex items-center mb-4">
