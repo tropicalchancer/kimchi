@@ -103,7 +103,7 @@ export function PostForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4">
+    <form onSubmit={handleSubmit} className="p-4 border border-gray-200">
       {error && (
         <div className="mb-4 p-3 text-red-700 text-sm">
           {error}
@@ -117,7 +117,7 @@ export function PostForm() {
             onChange={handleContentChange}
             placeholder="What did you get done?"
             rows={3}
-            className="block w-full border-0 pl-10 pr-4 py-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 resize-none"
+            className="block w-full border border-gray-200 pl-10 pr-4 py-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 resize-none"
             required
           />
           <div className="absolute left-4 top-3 text-gray-400 pointer-events-none">

@@ -80,9 +80,9 @@ export function PostList() {
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div className="bg-white border border-gray-200">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="p-4 bg-white animate-pulse">
+          <div key={i} className="p-4 animate-pulse border-b border-gray-200 last:border-b-0">
             <div className="flex items-center mb-4">
               <div className="h-8 w-8 rounded-full bg-gray-100 mr-3" />
               <div className="flex-1">
@@ -102,7 +102,7 @@ export function PostList() {
 
   if (error) {
     return (
-      <div className="p-4 text-red-700 bg-white">
+      <div className="p-4 text-red-700 bg-white border border-gray-200">
         {error}
       </div>
     )
@@ -110,16 +110,16 @@ export function PostList() {
 
   if (posts.length === 0) {
     return (
-      <div className="p-4 text-center bg-white">
+      <div className="p-4 text-center bg-white border border-gray-200">
         <p className="text-gray-500">No posts yet. Be the first to post!</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-2">
+    <div className="bg-white border border-gray-200">
       {posts.map((post) => (
-        <div key={post.id} className="p-4 bg-white">
+        <div key={post.id} className="p-4 border-b border-gray-200 last:border-b-0">
           <div className="flex items-center mb-4">
             {post.profiles.avatar_url ? (
               <img
