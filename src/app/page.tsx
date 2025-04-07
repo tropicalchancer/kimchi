@@ -34,9 +34,6 @@ export default function HomePage() {
     <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-          <div className="mb-8">
-            <p className="text-gray-600">What did you get done?</p>
-          </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
             <PostForm />
