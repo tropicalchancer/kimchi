@@ -5,8 +5,11 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Kimchi - Twitter Clone with Projects",
+  title: "kimchi ship",
   description: "A Twitter clone with project management features",
+  icons: {
+    icon: [{ url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>🥬</text></svg>" }],
+  },
 };
 
 export default function RootLayout({
