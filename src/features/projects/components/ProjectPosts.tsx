@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
-import { ProjectPostForm } from './ProjectPostForm'
 
 interface ProjectPost {
   id: string
@@ -87,8 +86,6 @@ export function ProjectPosts({ projectId }: ProjectPostsProps) {
 
   return (
     <div>
-      <ProjectPostForm projectId={projectId} />
-      
       {error && (
         <div className="p-3 text-red-700 text-sm">
           Error loading posts: {error}
@@ -97,7 +94,7 @@ export function ProjectPosts({ projectId }: ProjectPostsProps) {
       
       {!error && posts.length === 0 ? (
         <div className="p-4 text-center text-gray-500">
-          No posts yet. Be the first to post in this project!
+          No posts yet. Add a post from the main feed by using the project hashtag.
         </div>
       ) : (
         <div>
