@@ -7,9 +7,10 @@ interface PostContentProps {
   content: string
   projectId?: string | null
   projectTitle?: string | null
+  projectSlug?: string | null
 }
 
-export function PostContent({ content, projectId, projectTitle }: PostContentProps) {
+export function PostContent({ content, projectId, projectTitle, projectSlug }: PostContentProps) {
   const renderedContent = useMemo(() => {
     if (!content) return ''
 
@@ -17,7 +18,7 @@ export function PostContent({ content, projectId, projectTitle }: PostContentPro
     const urlPattern = /(https?:\/\/[^\s]+)/g
 
     // First handle project tag if present
-    if (projectId && projectTitle) {
+    if (projectId && projectTitle && projectSlug) {
       const projectTag = `#${projectTitle}`
       const parts = content.split(projectTag)
       
@@ -38,7 +39,7 @@ export function PostContent({ content, projectId, projectTitle }: PostContentPro
               ) : part
             ))}
             <Link
-              href={`/projects/${projectId}`}
+              href={`/projects/${projectSlug}`}
               className="text-blue-600 hover:text-blue-800 hover:underline"
             >
               {projectTag}
@@ -79,7 +80,7 @@ export function PostContent({ content, projectId, projectTitle }: PostContentPro
         ))}
       </>
     )
-  }, [content, projectId, projectTitle])
+  }, [content, projectId, projectTitle, projectSlug])
 
   return (
     <p className="text-gray-800 whitespace-pre-wrap">

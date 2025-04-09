@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 
-export default async function ProjectPage({ params }: { params: { id: string } }) {
+export default async function ProjectPage({ params }: { params: { slug: string } }) {
   const supabase = createServerComponentClient({ cookies })
   
   // Fetch project details
@@ -17,7 +17,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
         avatar_url
       )
     `)
-    .eq('slug', params.id)
+    .eq('slug', params.slug)
     .single()
 
   if (projectError || !project) {

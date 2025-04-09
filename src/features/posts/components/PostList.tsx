@@ -14,6 +14,7 @@ interface Post {
   projects: {
     id: string
     title: string
+    slug: string
   } | null
   profiles: {
     username: string
@@ -40,7 +41,8 @@ export function PostList() {
             project_id,
             projects (
               id,
-              title
+              title,
+              slug
             ),
             profiles (
               username,
@@ -144,6 +146,7 @@ export function PostList() {
               content={post.content}
               projectId={post.projects?.id}
               projectTitle={post.projects?.title}
+              projectSlug={post.projects?.slug}
             />
           </div>
         </div>
