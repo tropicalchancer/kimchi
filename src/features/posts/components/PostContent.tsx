@@ -13,7 +13,10 @@ export function PostContent({ content, projectId, projectTitle }: PostContentPro
   const renderedContent = useMemo(() => {
     if (!content) return ''
 
-    // If we have a linked project, make it clickable
+    // URL regex pattern
+    const urlPattern = /(https?:\/\/[^\s]+)/g
+
+    // First handle project tag if present
     if (projectId && projectTitle) {
       const projectTag = `#${projectTitle}`
       const parts = content.split(projectTag)
@@ -21,20 +24,61 @@ export function PostContent({ content, projectId, projectTitle }: PostContentPro
       if (parts.length > 1) {
         return (
           <>
-            {parts[0]}
+            {parts[0].split(urlPattern).map((part, i) => (
+              urlPattern.test(part) ? (
+                <a 
+                  key={i}
+                  href={part}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  {part}
+                </a>
+              ) : part
+            ))}
             <Link
               href={`/projects/${projectId}`}
               className="text-blue-600 hover:text-blue-800 hover:underline"
             >
               {projectTag}
             </Link>
-            {parts.slice(1).join(projectTag)}
+            {parts.slice(1).join(projectTag).split(urlPattern).map((part, i) => (
+              urlPattern.test(part) ? (
+                <a 
+                  key={i}
+                  href={part}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  {part}
+                </a>
+              ) : part
+            ))}
           </>
         )
       }
     }
 
-    return content
+    // If no project tag, just handle URLs
+    return (
+      <>
+        {content.split(urlPattern).map((part, i) => (
+          urlPattern.test(part) ? (
+            <a 
+              key={i}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              {part}
+            </a>
+          ) : part
+        ))}
+      </>
+    )
   }, [content, projectId, projectTitle])
 
   return (
