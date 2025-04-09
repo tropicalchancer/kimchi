@@ -4,6 +4,15 @@ import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 
+// Project emojis that represent different types of work
+const PROJECT_EMOJIS = ['📝', '🎨', '💻', '📚', '🔧', '🎯', '⚡️', '🚀', '💡', '🛠️', '📊', '🎮', '🔬', '📱', '🎵']
+
+function getProjectEmoji(title: string): string {
+  // Use the project title's first character as a seed
+  const seed = title.charCodeAt(0)
+  return PROJECT_EMOJIS[seed % PROJECT_EMOJIS.length]
+}
+
 export default async function ProjectPage({ params }: { params: { slug: string } }) {
   const supabase = createServerComponentClient({ cookies })
   
@@ -24,23 +33,17 @@ export default async function ProjectPage({ params }: { params: { slug: string }
     notFound()
   }
 
+  const projectEmoji = getProjectEmoji(project.title)
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="border border-gray-200">
         <div className="border-b border-gray-200">
           <div className="p-6">
             <div className="flex items-center space-x-4 mb-6">
-              {project.profiles.avatar_url ? (
-                <img
-                  src={project.profiles.avatar_url}
-                  alt={project.profiles.username}
-                  className="h-12 w-12 rounded-full"
-                />
-              ) : (
-                <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-medium">
-                  {project.profiles.username.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <div className="h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center text-2xl">
+                {projectEmoji}
+              </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-1 truncate">
                   {project.title}
