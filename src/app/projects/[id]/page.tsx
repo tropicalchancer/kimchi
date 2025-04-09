@@ -25,18 +25,18 @@ export default async function ProjectPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 sm:p-8">
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="border-b border-gray-200">
+        <div className="p-6">
           <div className="flex items-center space-x-4 mb-6">
             {project.profiles.avatar_url ? (
               <img
                 src={project.profiles.avatar_url}
                 alt={project.profiles.username}
-                className="h-12 w-12 rounded-full border-2 border-white shadow-sm"
+                className="h-12 w-12 rounded-full"
               />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 font-medium border-2 border-white shadow-sm">
+              <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-medium">
                 {project.profiles.username.charAt(0).toUpperCase()}
               </div>
             )}
@@ -59,7 +59,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
           </div>
         </div>
         
-        <div className="bg-gray-50 px-6 py-4 sm:px-8 border-t border-gray-100">
+        <div className="px-6 py-4 border-t border-gray-200">
           <div className="flex items-center space-x-4 text-sm">
             <div className="flex items-center text-gray-600">
               <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,8 +71,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
         </div>
       </div>
       
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">Project Updates</h2>
+      <div className="mt-6">
         <ProjectPosts projectId={params.id} />
       </div>
     </div>

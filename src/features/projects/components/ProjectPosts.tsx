@@ -86,37 +86,43 @@ export function ProjectPosts({ projectId }: ProjectPostsProps) {
   }, [supabase, router, projectId])
 
   return (
-    <div className="space-y-4">
+    <div>
       <ProjectPostForm projectId={projectId} />
       
       {error && (
-        <div className="bg-red-50 p-4 rounded-lg text-red-700">
+        <div className="p-3 text-red-700 text-sm">
           Error loading posts: {error}
         </div>
       )}
       
       {!error && posts.length === 0 ? (
-        <div className="bg-white p-4 rounded-lg shadow text-center text-gray-500">
+        <div className="p-4 text-center text-gray-500">
           No posts yet. Be the first to post in this project!
         </div>
       ) : (
-        posts.map((post) => (
-          <div key={post.id} className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center mb-2">
-              {post.profiles?.avatar_url ? (
-                <img
-                  src={post.profiles.avatar_url}
-                  alt={post.profiles.username}
-                  className="h-8 w-8 rounded-full mr-2"
-                />
-              ) : (
-                <div className="h-8 w-8 rounded-full bg-gray-200 mr-2" />
-              )}
-              <span className="font-medium">{post.profiles?.username || 'Unknown User'}</span>
+        <div>
+          {posts.map((post) => (
+            <div key={post.id} className="p-4 border-b border-gray-200 last:border-b-0">
+              <div className="flex items-center mb-4">
+                {post.profiles?.avatar_url ? (
+                  <img
+                    src={post.profiles.avatar_url}
+                    alt={post.profiles.username}
+                    className="h-8 w-8 rounded-full mr-3"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-gray-100 mr-3 flex items-center justify-center text-gray-500 text-sm">
+                    {post.profiles?.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="font-medium text-gray-900">{post.profiles?.username || 'Unknown User'}</div>
+                </div>
+              </div>
+              <p className="text-gray-800">{post.content}</p>
             </div>
-            <p className="text-gray-800">{post.content}</p>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   )
