@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { HomeIcon, FolderIcon, UserIcon } from '@heroicons/react/24/outline'
+import { FolderIcon, UserIcon } from '@heroicons/react/24/outline'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 
@@ -26,13 +26,6 @@ export function NavigationLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link
-                  href="/"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  <HomeIcon className="h-5 w-5 mr-1" />
-                  Home
-                </Link>
                 <Link
                   href="/projects"
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
