@@ -7,6 +7,7 @@ import type { PostgrestError } from '@supabase/supabase-js'
 
 export function ProjectForm() {
   const [title, setTitle] = useState('')
+  const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -15,7 +16,7 @@ export function ProjectForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !description.trim()) return
+    if (!title.trim() || !description.trim() || !slug.trim()) return
 
     setIsSubmitting(true)
     setError(null)
@@ -31,10 +32,22 @@ export function ProjectForm() {
         throw new Error('Not authenticated')
       }
 
+      // Check if slug is already taken
+      const { data: existingProject } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('slug', slug.trim())
+        .single()
+
+      if (existingProject) {
+        throw new Error('This URL is already taken. Please choose a different one.')
+      }
+
       const { error: projectError } = await supabase
         .from('projects')
         .insert([{
           title: title.trim(),
+          slug: slug.trim(),
           description: description.trim(),
           user_id: session.user.id
         }])
@@ -43,6 +56,7 @@ export function ProjectForm() {
       if (projectError) throw projectError
 
       setTitle('')
+      setSlug('')
       setDescription('')
       router.refresh()
     } catch (err: unknown) {
@@ -56,6 +70,16 @@ export function ProjectForm() {
       }
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  // Auto-generate slug from title
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    // Only auto-generate slug if user hasn't manually edited it
+    if (!slug || slug === newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')) {
+      setSlug(newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-'))
     }
   }
 
@@ -76,11 +100,31 @@ export function ProjectForm() {
             type="text"
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={handleTitleChange}
             placeholder="Enter project title"
             className="block w-full border-0 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 resize-none"
             required
           />
+        </div>
+
+        <div>
+          <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+            Project URL
+          </label>
+          <div className="flex items-center">
+            <span className="text-gray-500 px-4 py-3">/projects/</span>
+            <input
+              type="text"
+              id="slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}
+              placeholder="project-url"
+              className="block w-full border-0 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:ring-0 resize-none"
+              required
+              pattern="[a-z0-9-]+"
+              title="Only lowercase letters, numbers, and hyphens are allowed"
+            />
+          </div>
         </div>
 
         <div>
@@ -104,6 +148,7 @@ export function ProjectForm() {
           type="button"
           onClick={() => {
             setTitle('')
+            setSlug('')
             setDescription('')
           }}
           className="text-sm text-gray-500 hover:text-gray-700"
@@ -113,7 +158,7 @@ export function ProjectForm() {
         </button>
         <button
           type="submit"
-          disabled={isSubmitting || !title.trim() || !description.trim()}
+          disabled={isSubmitting || !title.trim() || !description.trim() || !slug.trim()}
           className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#D9361E] hover:bg-[#B22D19] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? (

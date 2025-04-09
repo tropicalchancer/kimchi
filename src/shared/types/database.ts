@@ -17,6 +17,7 @@ export interface Post {
 export interface Project {
   id: string
   title: string
+  slug: string
   description: string
   user_id: string
   created_at: string

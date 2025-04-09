@@ -37,7 +37,7 @@ export function ProjectList({ projects }: ProjectListProps) {
       {projects.map((project) => (
         <Link
           key={project.id}
-          href={`/projects/${project.id}`}
+          href={`/projects/${project.slug}`}
           className="block p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
         >
           <div className="flex items-center mb-4">

@@ -17,7 +17,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
         avatar_url
       )
     `)
-    .eq('id', params.id)
+    .eq('slug', params.id)
     .single()
 
   if (projectError || !project) {
@@ -62,7 +62,7 @@ export default async function ProjectPage({ params }: { params: { id: string } }
         </div>
         
         <div>
-          <ProjectPosts projectId={params.id} />
+          <ProjectPosts projectId={project.id} />
         </div>
       </div>
     </div>
