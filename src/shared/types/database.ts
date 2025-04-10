@@ -42,9 +42,30 @@ export interface Database {
         Update: Partial<Omit<Profile, 'created_at'>>
       }
       posts: {
-        Row: Omit<Post, 'profiles'>
-        Insert: Omit<Post, 'id' | 'created_at' | 'profiles'>
-        Update: Partial<Omit<Post, 'id' | 'created_at' | 'profiles'>>
+        Row: {
+          id: string
+          created_at: string
+          content: string
+          user_id: string
+          project_id: string | null
+          image_url: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          content: string
+          user_id: string
+          project_id?: string | null
+          image_url?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          content?: string
+          user_id?: string
+          project_id?: string | null
+          image_url?: string | null
+        }
       }
       projects: {
         Row: Omit<Project, 'profiles'>

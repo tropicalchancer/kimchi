@@ -2,32 +2,34 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
-import { PostContent } from './PostContent'
 import { formatDistanceToNow } from 'date-fns'
+import { PostContent } from './PostContent'
+
+interface Profile {
+  username: string
+  avatar_url: string | null
+}
 
 interface Post {
   id: string
   content: string
   created_at: string
+  user_id: string
   project_id: string | null
+  image_url: string | null
+  profiles: Profile
   projects: {
     id: string
     title: string
     slug: string
   } | null
-  profiles: {
-    username: string
-    avatar_url: string | null
-  }
 }
 
 export function PostList() {
   const [posts, setPosts] = useState<Post[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClientComponentClient()
-  const router = useRouter()
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -35,119 +37,126 @@ export function PostList() {
         const { data, error } = await supabase
           .from('posts')
           .select(`
-            id,
-            content,
-            created_at,
-            project_id,
+            *,
+            profiles (
+              username,
+              avatar_url
+            ),
             projects (
               id,
               title,
               slug
-            ),
-            profiles (
-              username,
-              avatar_url
             )
           `)
           .order('created_at', { ascending: false })
-          .returns<Post[]>()
 
         if (error) throw error
+
         setPosts(data || [])
-      } catch (err) {
-        console.error('Error fetching posts:', err)
-        setError(err instanceof Error ? err.message : 'Error fetching posts')
+      } catch (error) {
+        console.error('Error fetching posts:', error)
+        setError('Failed to load posts')
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
     fetchPosts()
 
+    // Subscribe to new posts
     const channel = supabase
-      .channel('realtime posts')
+      .channel('posts')
       .on('postgres_changes', {
-        event: '*',
+        event: 'INSERT',
         schema: 'public',
         table: 'posts'
-      }, () => {
-        fetchPosts()
+      }, async (payload) => {
+        // Fetch the complete post data including profile and project
+        const { data, error } = await supabase
+          .from('posts')
+          .select(`
+            *,
+            profiles (
+              username,
+              avatar_url
+            ),
+            projects (
+              id,
+              title,
+              slug
+            )
+          `)
+          .eq('id', payload.new.id)
+          .single()
+
+        if (!error && data) {
+          setPosts(prevPosts => [data, ...prevPosts])
+        }
       })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [supabase, router])
+  }, [supabase])
 
-  if (isLoading) {
-    return (
-      <div>
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="p-4 animate-pulse border-b border-gray-200 last:border-b-0">
-            <div className="flex items-center mb-4">
-              <div className="h-8 w-8 rounded-full bg-gray-100 mr-3" />
-              <div className="flex-1">
-                <div className="h-4 w-24 bg-gray-100 rounded mb-2" />
-                <div className="h-3 w-16 bg-gray-100 rounded" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-100 rounded w-3/4" />
-              <div className="h-4 bg-gray-100 rounded w-1/2" />
-            </div>
-          </div>
-        ))}
-      </div>
-    )
+  if (loading) {
+    return <div className="p-4">Loading posts...</div>
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-red-700">
-        {error}
-      </div>
-    )
+    return <div className="p-4 text-red-600">{error}</div>
   }
 
   if (posts.length === 0) {
-    return (
-      <div className="p-4 text-center">
-        <p className="text-gray-500">No posts yet. Be the first to post!</p>
-      </div>
-    )
+    return <div className="p-4 text-gray-500">No posts yet. Be the first to post!</div>
   }
 
   return (
-    <div>
+    <div className="divide-y divide-gray-200">
       {posts.map((post) => (
-        <div key={post.id} className="p-4 border-b border-gray-200 last:border-b-0">
-          <div className="flex items-center mb-4">
-            {post.profiles.avatar_url ? (
-              <img
-                src={post.profiles.avatar_url}
-                alt={post.profiles.username}
-                className="h-8 w-8 rounded-full mr-3"
-              />
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-gray-100 mr-3 flex items-center justify-center text-gray-500 text-sm">
-                {post.profiles.username.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <div className="font-medium text-gray-900">{post.profiles.username}</div>
-              <div className="text-sm text-gray-500">
-                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-              </div>
+        <div key={post.id} className="p-4">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              {post.profiles.avatar_url ? (
+                <img
+                  src={post.profiles.avatar_url}
+                  alt={post.profiles.username}
+                  className="h-10 w-10 rounded-full"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500 font-medium">
+                    {post.profiles.username.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
-          <div className="text-gray-900">
-            <PostContent
-              content={post.content}
-              projectId={post.projects?.id}
-              projectTitle={post.projects?.title}
-              projectSlug={post.projects?.slug}
-            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900">
+                {post.profiles.username}
+              </p>
+              <p className="text-sm text-gray-500">
+                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+              </p>
+              <div className="mt-1">
+                <PostContent 
+                  content={post.content}
+                  projectId={post.projects?.id}
+                  projectTitle={post.projects?.title}
+                  projectSlug={post.projects?.slug}
+                />
+              </div>
+              {post.image_url && (
+                <div className="mt-3">
+                  <img
+                    src={post.image_url}
+                    alt="Post attachment"
+                    className="rounded-lg max-h-96 object-cover"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       ))}
