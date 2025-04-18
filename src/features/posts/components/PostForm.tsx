@@ -1,17 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { ImageUpload } from './ImageUpload'
+
+interface ProjectSuggestion {
+  id: string
+  title: string
+  slug: string
+}
 
 export function PostForm() {
   const [content, setContent] = useState('')
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [projectSuggestions, setProjectSuggestions] = useState<ProjectSuggestion[]>([])
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null)
   const router = useRouter()
   const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    const fetchProjectSuggestions = async () => {
+      if (!content || cursorPosition === null) {
+        setProjectSuggestions([])
+        return
+      }
+
+      // Get the word being typed after #
+      const beforeCursor = content.slice(0, cursorPosition)
+      const hashtagMatch = beforeCursor.match(/#([\w-]*)$/)
+      
+      if (!hashtagMatch) {
+        setProjectSuggestions([])
+        return
+      }
+
+      const searchTerm = hashtagMatch[1].toLowerCase()
+      
+      if (searchTerm) {
+        const { data } = await supabase
+          .from('projects')
+          .select('id, title, slug')
+          .or(`title.ilike.${searchTerm}%,slug.ilike.${searchTerm}%`)
+          .limit(5)
+
+        setProjectSuggestions(data || [])
+      } else {
+        setProjectSuggestions([])
+      }
+    }
+
+    fetchProjectSuggestions()
+  }, [content, cursorPosition, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,15 +73,16 @@ export function PostForm() {
         return
       }
 
-      // Extract project hashtag if present
-      const projectMatch = content.match(/#(\w+)/)
+      // Extract project hashtag if present - look for the last hashtag
+      const projectMatches = Array.from(content.matchAll(/#([\w-]+)/g))
       let projectId = null
 
-      if (projectMatch) {
+      if (projectMatches.length > 0) {
+        const lastMatch = projectMatches[projectMatches.length - 1]
         const { data: project } = await supabase
           .from('projects')
           .select('id')
-          .eq('slug', projectMatch[1])
+          .eq('slug', lastMatch[1])
           .single()
         
         if (project) {
@@ -93,14 +137,58 @@ export function PostForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="rounded-lg border border-gray-200">
+      <div className="rounded-lg border border-gray-200 relative">
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onSelect={(e) => {
+            const target = e.target as HTMLTextAreaElement
+            setCursorPosition(target.selectionStart)
+          }}
           placeholder="What's on your mind?"
           rows={3}
           className="block w-full resize-none border-0 bg-transparent p-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
         />
+        
+        {projectSuggestions.length > 0 && (
+          <div className="absolute mt-2 inset-x-0 z-10">
+            <div className="bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden mx-4">
+              <div className="py-2">
+                {projectSuggestions.map((project) => (
+                  <li
+                    key={project.id}
+                    className="flex items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                    onClick={() => {
+                      if (cursorPosition === null) return
+                      
+                      const beforeCursor = content.slice(0, cursorPosition)
+                      const afterCursor = content.slice(cursorPosition)
+                      
+                      // Replace the partial hashtag with the full project slug
+                      const newContent = beforeCursor.replace(/#[^#\s]*$/, `#${project.slug}`) + afterCursor
+                      
+                      setContent(newContent)
+                      setProjectSuggestions([])
+                    }}
+                  >
+                    <div className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-700 font-medium">
+                      {project.title[0].toUpperCase()}
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <div className="font-medium text-gray-900">{project.title}</div>
+                      <div className="text-sm text-gray-500">#{project.slug}</div>
+                    </div>
+                    <div className="ml-2">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </li>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="flex items-center justify-between p-2 border-t border-gray-200">
           <ImageUpload 
@@ -119,10 +207,12 @@ export function PostForm() {
 
       {imageUrl && (
         <div className="relative">
-          <img 
+          <Image 
             src={imageUrl} 
             alt="Upload preview" 
-            className="max-h-64 rounded-lg object-cover"
+            width={400}
+            height={300}
+            className="max-h-64 rounded-lg object-cover w-full"
           />
           <button
             type="button"

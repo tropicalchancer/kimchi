@@ -1,87 +1,126 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
-import { Project } from '@/shared/types/database'
-import { formatDistanceToNow } from 'date-fns'
+import type { Database } from '../../../lib/database.types'
 
-interface ProjectListProps {
-  projects: Project[]
+type Project = Database['public']['Tables']['projects']['Row'] & {
+  profiles: Database['public']['Tables']['profiles']['Row']
 }
 
-export function ProjectList({ projects }: ProjectListProps) {
+export function ProjectList() {
+  const [projects, setProjects] = useState<Project[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClientComponentClient<Database>()
+
+  async function fetchProjects() {
+    try {
+      const { data } = await supabase
+        .from('projects')
+        .select('*, profiles(*)')
+        .order('created_at', { ascending: false })
+
+      setProjects(data || [])
+    } catch (error) {
+      console.error('Error fetching projects:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProjects()
+
+    // Subscribe to changes
+    const channel = supabase
+      .channel('projects_realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'projects'
+      }, async (payload) => {
+        // Fetch the complete project with profile data
+        const { data: newProject } = await supabase
+          .from('projects')
+          .select('*, profiles(*)')
+          .eq('id', payload.new.id)
+          .single()
+
+        if (newProject) {
+          setProjects(currentProjects => [newProject, ...currentProjects])
+        }
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'projects'
+      }, async (payload) => {
+        // Fetch the updated project with profile data
+        const { data: updatedProject } = await supabase
+          .from('projects')
+          .select('*, profiles(*)')
+          .eq('id', payload.new.id)
+          .single()
+
+        if (updatedProject) {
+          setProjects(currentProjects =>
+            currentProjects.map(project =>
+              project.id === updatedProject.id ? updatedProject : project
+            )
+          )
+        }
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'projects'
+      }, (payload) => {
+        setProjects(currentProjects =>
+          currentProjects.filter(project => project.id !== payload.old.id)
+        )
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
+
+  if (isLoading) {
+    return (
+      <div className="py-4 text-center text-gray-500">
+        Loading projects...
+      </div>
+    )
+  }
+
   if (projects.length === 0) {
     return (
-      <div className="p-4 text-center">
-        <svg
-          className="mx-auto h-12 w-12 text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-          />
-        </svg>
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No projects</h3>
-        <p className="mt-1 text-sm text-gray-500">Get started by creating a new project.</p>
+      <div className="py-4 text-center text-gray-500">
+        No projects yet. Create your first project!
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {projects.map((project) => (
         <Link
           key={project.id}
           href={`/projects/${project.slug}`}
-          className="block p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+          className="block transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D9361E] rounded-lg"
         >
-          <div className="flex items-center mb-4">
-            {project.profiles.avatar_url ? (
-              <img
-                src={project.profiles.avatar_url}
-                alt={project.profiles.username}
-                className="h-8 w-8 rounded-full mr-3"
-              />
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-gray-100 mr-3 flex items-center justify-center text-gray-500 text-sm">
-                {project.profiles.username.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {project.profiles.username}
-              </p>
-              <p className="text-sm text-gray-500">
-                {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
-              </p>
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900">
+              {project.title}
+            </h3>
+            <p className="mt-2 text-gray-600">
+              {project.description}
+            </p>
+            <div className="mt-4 flex items-center text-sm text-gray-500">
+              <span>Created by {project.profiles?.full_name || 'Anonymous'}</span>
             </div>
-          </div>
-
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
-            {project.title}
-          </h3>
-          <p className="text-gray-600 line-clamp-3">{project.description}</p>
-
-          <div className="mt-4 flex items-center text-sm text-[#D9361E]">
-            <span>View project</span>
-            <svg
-              className="ml-2 h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
           </div>
         </Link>
       ))}

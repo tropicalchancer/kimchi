@@ -19,7 +19,7 @@ export function PostContent({ content, projectId, projectTitle, projectSlug }: P
 
     // First handle project tag if present
     if (projectId && projectTitle && projectSlug) {
-      const projectTag = `#${projectTitle}`
+      const projectTag = `#${projectSlug}`
       const parts = content.split(projectTag)
       
       if (parts.length > 1) {
