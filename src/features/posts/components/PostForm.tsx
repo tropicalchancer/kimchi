@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { ImageUpload } from './ImageUpload'
 
 interface ProjectSuggestion {
@@ -30,7 +31,7 @@ export function PostForm() {
 
       // Get the word being typed after #
       const beforeCursor = content.slice(0, cursorPosition)
-      const hashtagMatch = beforeCursor.match(/#([^#\s]*)$/)
+      const hashtagMatch = beforeCursor.match(/#([\w-]*)$/)
       
       if (!hashtagMatch) {
         setProjectSuggestions([])
@@ -43,7 +44,7 @@ export function PostForm() {
         const { data } = await supabase
           .from('projects')
           .select('id, title, slug')
-          .ilike('title', `${searchTerm}%`)
+          .or(`title.ilike.${searchTerm}%,slug.ilike.${searchTerm}%`)
           .limit(5)
 
         setProjectSuggestions(data || [])
@@ -73,7 +74,7 @@ export function PostForm() {
       }
 
       // Extract project hashtag if present - look for the last hashtag
-      const projectMatches = Array.from(content.matchAll(/#([^#\s]+)/g))
+      const projectMatches = Array.from(content.matchAll(/#([\w-]+)/g))
       let projectId = null
 
       if (projectMatches.length > 0) {
@@ -206,10 +207,12 @@ export function PostForm() {
 
       {imageUrl && (
         <div className="relative">
-          <img 
+          <Image 
             src={imageUrl} 
             alt="Upload preview" 
-            className="max-h-64 rounded-lg object-cover"
+            width={400}
+            height={300}
+            className="max-h-64 rounded-lg object-cover w-full"
           />
           <button
             type="button"
