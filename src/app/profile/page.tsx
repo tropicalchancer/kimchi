@@ -6,6 +6,7 @@ import { useSession } from '@/hooks/useSession'
 import { supabase } from '@/lib/api/supabase/client'
 import { Post, Profile, Project } from '@/shared/types/database'
 import { formatDistanceToNow } from 'date-fns'
+import { ProfileActions } from '@/features/profile/components/ProfileActions'
 
 interface ExtendedPost extends Post {
   image_url?: string | null
@@ -121,9 +122,12 @@ export default function ProfilePage() {
               </div>
             )}
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                {profile.full_name}
-              </h1>
+              <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                  {profile.full_name}
+                </h1>
+                <ProfileActions profile={profile} />
+              </div>
               <p className="text-gray-600 mb-3">@{profile.username}</p>
               <p className="text-sm text-gray-500">
                 Member since {formatDistanceToNow(new Date(profile.created_at), { addSuffix: true })}
