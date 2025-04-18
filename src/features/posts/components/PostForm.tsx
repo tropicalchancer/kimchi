@@ -46,17 +46,33 @@ export function PostForm() {
         }
       }
 
-      const { error: insertError } = await supabase.from('posts').insert({
+      const { error: insertError, data: newPost } = await supabase.from('posts').insert({
         content,
         user_id: session.user.id,
         project_id: projectId,
         image_url: imageUrl
-      })
+      }).select(`
+        *,
+        profiles (
+          username,
+          avatar_url
+        ),
+        projects (
+          id,
+          title,
+          slug
+        )
+      `).single()
 
       if (insertError) throw insertError
 
       setContent('')
       setImageUrl(null)
+      
+      // Emit a custom event to notify PostList about the new post
+      const customEvent = new CustomEvent('new-post', { detail: newPost })
+      window.dispatchEvent(customEvent)
+      
       router.refresh()
     } catch (error) {
       console.error('Error creating post:', error)

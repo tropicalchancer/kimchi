@@ -25,6 +25,22 @@ interface Post {
   } | null
 }
 
+// Add custom event type
+interface NewPostEvent extends CustomEvent {
+  detail: Post
+}
+
+interface PostgresInsertPayload {
+  new: {
+    id: string
+    content: string
+    created_at: string
+    user_id: string
+    project_id: string | null
+    image_url: string | null
+  }
+}
+
 export function PostList() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
@@ -63,39 +79,51 @@ export function PostList() {
 
     fetchPosts()
 
-    // Subscribe to new posts
+    // Handle custom event for new posts
+    const handleNewPost = (event: NewPostEvent) => {
+      const newPost = event.detail
+      setPosts(prevPosts => [newPost, ...prevPosts])
+    }
+
+    window.addEventListener('new-post', handleNewPost as EventListener)
+
+    // Subscribe to real-time updates
     const channel = supabase
       .channel('posts')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'posts'
-      }, async (payload) => {
-        // Fetch the complete post data including profile and project
-        const { data, error } = await supabase
-          .from('posts')
-          .select(`
-            *,
-            profiles (
-              username,
-              avatar_url
-            ),
-            projects (
-              id,
-              title,
-              slug
-            )
-          `)
-          .eq('id', payload.new.id)
-          .single()
+      }, async (payload: PostgresInsertPayload) => {
+        // Only fetch if it's not our own post (handled by custom event)
+        const customEventPost = payload.new.id
+        if (!posts.some(post => post.id === customEventPost)) {
+          const { data, error } = await supabase
+            .from('posts')
+            .select(`
+              *,
+              profiles (
+                username,
+                avatar_url
+              ),
+              projects (
+                id,
+                title,
+                slug
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single()
 
-        if (!error && data) {
-          setPosts(prevPosts => [data, ...prevPosts])
+          if (!error && data) {
+            setPosts(prevPosts => [data, ...prevPosts])
+          }
         }
       })
       .subscribe()
 
     return () => {
+      window.removeEventListener('new-post', handleNewPost as EventListener)
       supabase.removeChannel(channel)
     }
   }, [supabase])
