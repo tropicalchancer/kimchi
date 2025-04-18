@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import type { PostgrestError } from '@supabase/supabase-js'
@@ -9,9 +9,16 @@ import { Modal } from '@/components/Modal'
 interface ProjectFormProps {
   isOpen: boolean
   onClose: () => void
+  project?: {
+    id: string
+    title: string
+    slug: string
+    description: string
+    user_id: string
+  }
 }
 
-export function ProjectForm({ isOpen, onClose }: ProjectFormProps) {
+export function ProjectForm({ isOpen, onClose, project }: ProjectFormProps) {
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
@@ -19,6 +26,15 @@ export function ProjectForm({ isOpen, onClose }: ProjectFormProps) {
   const [error, setError] = useState<string | null>(null)
   const supabase = createClientComponentClient()
   const router = useRouter()
+
+  // Initialize form with project data if in edit mode
+  useEffect(() => {
+    if (project) {
+      setTitle(project.title)
+      setSlug(project.slug)
+      setDescription(project.description)
+    }
+  }, [project])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,28 +54,46 @@ export function ProjectForm({ isOpen, onClose }: ProjectFormProps) {
         throw new Error('Not authenticated')
       }
 
-      // Check if slug is already taken
-      const { data: existingProject } = await supabase
-        .from('projects')
-        .select('id')
-        .eq('slug', slug.trim())
-        .single()
+      // Check if slug is already taken (only in create mode or if slug changed)
+      if (!project || project.slug !== slug.trim()) {
+        const { data: existingProject } = await supabase
+          .from('projects')
+          .select('id')
+          .eq('slug', slug.trim())
+          .single()
 
-      if (existingProject) {
-        throw new Error('This URL is already taken. Please choose a different one.')
+        if (existingProject) {
+          throw new Error('This URL is already taken. Please choose a different one.')
+        }
       }
 
-      const { error: projectError } = await supabase
-        .from('projects')
-        .insert([{
-          title: title.trim(),
-          slug: slug.trim(),
-          description: description.trim(),
-          user_id: session.user.id
-        }])
-        .select()
+      if (project) {
+        // Update existing project
+        const { error: projectError } = await supabase
+          .from('projects')
+          .update({
+            title: title.trim(),
+            slug: slug.trim(),
+            description: description.trim()
+          })
+          .eq('id', project.id)
+          .eq('user_id', session.user.id) // Ensure user owns the project
 
-      if (projectError) throw projectError
+        if (projectError) throw projectError
+      } else {
+        // Create new project
+        const { error: projectError } = await supabase
+          .from('projects')
+          .insert([{
+            title: title.trim(),
+            slug: slug.trim(),
+            description: description.trim(),
+            user_id: session.user.id
+          }])
+          .select()
+
+        if (projectError) throw projectError
+      }
 
       setTitle('')
       setSlug('')
@@ -67,13 +101,13 @@ export function ProjectForm({ isOpen, onClose }: ProjectFormProps) {
       router.refresh()
       onClose()
     } catch (err: unknown) {
-      console.error('Error creating project:', err)
+      console.error('Error saving project:', err)
       if (err instanceof Error) {
         setError(err.message)
       } else if ((err as PostgrestError)?.message) {
         setError((err as PostgrestError).message)
       } else {
-        setError('Error creating project')
+        setError('Error saving project')
       }
     } finally {
       setIsSubmitting(false)
@@ -95,7 +129,7 @@ export function ProjectForm({ isOpen, onClose }: ProjectFormProps) {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Project">
+    <Modal isOpen={isOpen} onClose={onClose} title={project ? "Edit Project" : "Create New Project"}>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm">
@@ -174,10 +208,10 @@ export function ProjectForm({ isOpen, onClose }: ProjectFormProps) {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Creating...
+                {project ? 'Saving...' : 'Creating...'}
               </>
             ) : (
-              'Create Project'
+              project ? 'Save Changes' : 'Create Project'
             )}
           </button>
         </div>

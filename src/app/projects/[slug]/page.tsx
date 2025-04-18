@@ -3,6 +3,8 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
+import type { Database } from '@/lib/database.types'
+import { ProjectActions } from './ProjectActions'
 
 // Project emojis that represent different types of work
 const PROJECT_EMOJIS = ['📝', '🎨', '💻', '📚', '🔧', '🎯', '⚡️', '🚀', '💡', '🛠️', '📊', '🎮', '🔬', '📱', '🎵']
@@ -13,9 +15,16 @@ function getProjectEmoji(title: string): string {
   return PROJECT_EMOJIS[seed % PROJECT_EMOJIS.length]
 }
 
-export default async function ProjectPage({ params }: { params: { slug: string } }) {
-  const supabase = createServerComponentClient({ cookies })
+interface ProjectPageProps {
+  params: { slug: string }
+}
+
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const supabase = createServerComponentClient<Database>({ cookies })
   
+  // Get current session
+  const { data: { session } } = await supabase.auth.getSession()
+
   // Fetch project details
   const { data: project, error: projectError } = await supabase
     .from('projects')
@@ -33,6 +42,7 @@ export default async function ProjectPage({ params }: { params: { slug: string }
     notFound()
   }
 
+  const isOwner = session?.user?.id === project.user_id
   const projectEmoji = getProjectEmoji(project.title)
 
   return (
@@ -45,9 +55,12 @@ export default async function ProjectPage({ params }: { params: { slug: string }
                 {projectEmoji}
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1 truncate">
-                  {project.title}
-                </h1>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-1 truncate">
+                    {project.title}
+                  </h1>
+                  {isOwner && <ProjectActions project={project} />}
+                </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <span>Created by {project.profiles.username}</span>
                   <span className="mx-2">•</span>
