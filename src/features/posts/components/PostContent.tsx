@@ -83,7 +83,7 @@ export function PostContent({ content, projectId, projectTitle, projectSlug }: P
   }, [content, projectId, projectTitle, projectSlug])
 
   return (
-    <p className="text-gray-800 whitespace-pre-wrap">
+    <p className="text-lg text-gray-800 whitespace-pre-wrap">
       {renderedContent}
     </p>
   )

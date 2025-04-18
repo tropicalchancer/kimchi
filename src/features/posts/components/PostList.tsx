@@ -161,13 +161,13 @@ export function PostList() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-base font-medium text-gray-900">
                 {post.profiles.username}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-base text-gray-500">
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
               </p>
-              <div className="mt-1">
+              <div className="mt-2">
                 <PostContent 
                   content={post.content}
                   projectId={post.projects?.id}
