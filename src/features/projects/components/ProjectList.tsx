@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '@/lib/database.types'
+import Link from 'next/link'
+import type { Database } from '../../../lib/database.types'
 
 type Project = Database['public']['Tables']['projects']['Row'] & {
   profiles: Database['public']['Tables']['profiles']['Row']
@@ -105,20 +106,23 @@ export function ProjectList() {
   return (
     <div className="space-y-6">
       {projects.map((project) => (
-        <div
+        <Link
           key={project.id}
-          className="bg-white shadow rounded-lg p-6"
+          href={`/projects/${project.slug}`}
+          className="block transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D9361E] rounded-lg"
         >
-          <h3 className="text-lg font-medium text-gray-900">
-            {project.title}
-          </h3>
-          <p className="mt-2 text-gray-600">
-            {project.description}
-          </p>
-          <div className="mt-4 flex items-center text-sm text-gray-500">
-            <span>Created by {project.profiles?.full_name || 'Anonymous'}</span>
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-900">
+              {project.title}
+            </h3>
+            <p className="mt-2 text-gray-600">
+              {project.description}
+            </p>
+            <div className="mt-4 flex items-center text-sm text-gray-500">
+              <span>Created by {project.profiles?.full_name || 'Anonymous'}</span>
+            </div>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   )
