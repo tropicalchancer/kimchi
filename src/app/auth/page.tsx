@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Auth } from '@supabase/auth-ui-react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
@@ -10,6 +10,12 @@ import Link from 'next/link'
 export default function AuthPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const [redirectUrl, setRedirectUrl] = useState<string>('')
+
+  useEffect(() => {
+    // Set redirect URL after component mounts (client-side only)
+    setRedirectUrl(`${window.location.origin}/auth/callback`)
+  }, [])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -19,6 +25,20 @@ export default function AuthPage() {
       }
     }
     checkUser()
+
+    // Subscribe to auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        router.push('/')
+      }
+    })
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [router, supabase.auth])
 
   return (
@@ -70,7 +90,7 @@ export default function AuthPage() {
               },
             }}
             providers={['github']}
-            redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
+            redirectTo={redirectUrl}
             theme="default"
           />
         </div>
