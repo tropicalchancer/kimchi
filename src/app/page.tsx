@@ -58,7 +58,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-6xl font-bold mb-6">Join Kimchi</h1>
+            <h1 className="text-6xl font-bold mb-6">join kimchi</h1>
             <div className="flex -space-x-2 mb-8">
               {[...Array(7)].map((_, i) => (
                 <div
@@ -69,7 +69,6 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <p className="text-2xl mb-8">Ship with these and many other makers</p>
             
             <div className="bg-white rounded-xl p-8 mb-8 shadow-sm border border-gray-100">
               <h2 className="text-xl font-semibold mb-4">Kimchi is a cozy community for makers.</h2>
@@ -81,39 +80,39 @@ export default function HomePage() {
                 href="/auth"
                 className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-[#D9361E] hover:bg-[#B22D19] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D9361E] shadow-sm"
               >
-                Join Kimchi
+                join kimchi
               </Link>
             </div>
           </div>
 
           <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-12 shadow-sm border border-gray-100">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#D9361E] to-[#FF8C77] text-transparent bg-clip-text">We&apos;re a group of makers shipping together.</h2>
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#D9361E] to-[#FF8C77] text-transparent bg-clip-text">Curious minds, building tomorrow—together.</h2>
             <p className="text-xl text-gray-700 mb-12">
-              From indie hackers to established creators building sustainable projects.
+            Hackers, devs, and researchers converge to invent a more human‑centric AI age.
             </p>
 
             <div className="space-y-6">
               <div className="bg-white rounded-xl p-6 flex items-start space-x-4 shadow-sm border border-gray-100">
-                <span className="text-2xl">🚢</span>
+                <span className="text-2xl">🚀</span>
                 <div>
-                  <h3 className="font-semibold text-xl">Build better habits</h3>
-                  <p className="text-gray-600">by surrounding yourself with productive makers.</p>
+                  <h3 className="font-semibold text-xl">Habit‑stack for output</h3>
+                  <p className="text-gray-600">Build with driven makers.</p>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-6 flex items-start space-x-4 shadow-sm border border-gray-100">
-                <span className="text-2xl">💬</span>
+                <span className="text-2xl">💡</span>
                 <div>
-                  <h3 className="font-semibold text-xl">Get advice & feedback</h3>
-                  <p className="text-gray-600">from experienced creators and makers.</p>
+                  <h3 className="font-semibold text-xl">Braintrust on tap</h3>
+                  <p className="text-gray-600">Co‑create with others in the Zuzalu realm.</p>
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-6 flex items-start space-x-4 shadow-sm border border-gray-100">
                 <span className="text-2xl">✅</span>
                 <div>
-                  <h3 className="font-semibold text-xl">Stay accountable</h3>
-                  <p className="text-gray-600">by publicly sharing your progress.</p>
+                  <h3 className="font-semibold text-xl">Accountability that sticks</h3>
+                  <p className="text-gray-600">Log wins, course‑correct together.</p>
                 </div>
               </div>
             </div>
