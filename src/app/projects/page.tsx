@@ -1,10 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 import { ProjectForm, ProjectList } from '@/features/projects'
 
 export default function ProjectsPage() {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.push('/auth')
+      }
+      setIsLoading(false)
+    }
+    checkUser()
+  }, [router, supabase.auth])
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-pulse text-gray-500">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
