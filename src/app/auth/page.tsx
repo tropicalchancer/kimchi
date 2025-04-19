@@ -89,6 +89,13 @@ export default function AuthPage() {
                 },
               },
             }}
+            localization={{
+              variables: {
+                sign_in: {
+                  social_provider_text: "Continue with Zupass"
+                }
+              }
+            }}
             providers={['github']}
             redirectTo={redirectUrl}
             theme="default"
