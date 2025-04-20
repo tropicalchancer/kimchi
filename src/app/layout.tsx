@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "kimchi ship",
   description: "A Twitter clone with project management features",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   icons: {
     icon: [
       {
