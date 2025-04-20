@@ -29,7 +29,19 @@ export default function AuthPage() {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <Auth
             supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
+            appearance={{ 
+              theme: ThemeSupa,
+              style: {
+                input: {
+                  fontSize: '16px',
+                  padding: '12px 16px',
+                },
+                button: {
+                  fontSize: '16px',
+                  padding: '12px 16px',
+                }
+              }
+            }}
             providers={['github']}
             redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
             theme="dark"
