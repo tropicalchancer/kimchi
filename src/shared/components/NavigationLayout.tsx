@@ -4,10 +4,28 @@ import Link from 'next/link'
 import { UserIcon } from '@heroicons/react/24/outline'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
 export function NavigationLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      setIsAuthenticated(!!session)
+    }
+    checkUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -26,29 +44,35 @@ export function NavigationLayout({ children }: { children: React.ReactNode }) {
                   <span className="text-xl font-bold" style={{ color: '#D9361E' }}>kimchi</span>
                 </Link>
               </div>
-              <div className="flex items-center ml-4">
-                <Link
-                  href="/projects"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 border-b-2 text-sm font-medium"
-                >
-                  Projects
-                </Link>
-              </div>
+              {isAuthenticated && (
+                <div className="flex items-center ml-4">
+                  <Link
+                    href="/projects"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 border-b-2 text-sm font-medium"
+                  >
+                    Projects
+                  </Link>
+                </div>
+              )}
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/profile"
-                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-              >
-                <UserIcon className="h-5 w-5 mr-1" />
-                Profile
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
-              >
-                Sign out
-              </button>
+              {isAuthenticated && (
+                <>
+                  <Link
+                    href="/profile"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >
+                    <UserIcon className="h-5 w-5 mr-1" />
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                  >
+                    Sign out
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
