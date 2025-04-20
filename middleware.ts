@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
 // Only run middleware on auth-required pages
 export const config = {
   matcher: [
-    '/',
+    '/feed',
     '/projects',
     '/projects/:path*',
     '/profile',

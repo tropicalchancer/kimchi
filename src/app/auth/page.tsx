@@ -21,7 +21,7 @@ export default function AuthPage() {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        router.push('/')
+        router.push('/feed')
       }
     }
     checkUser()
@@ -31,7 +31,7 @@ export default function AuthPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        router.push('/')
+        router.push('/feed')
       }
     })
 
