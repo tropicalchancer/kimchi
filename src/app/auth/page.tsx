@@ -81,7 +81,7 @@ export default function AuthPage() {
                 },
                 input: {
                   borderRadius: '6px',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   padding: '8px 12px',
                 },
                 anchor: {
