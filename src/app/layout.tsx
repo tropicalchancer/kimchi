@@ -8,7 +8,13 @@ export const metadata: Metadata = {
   title: "kimchi ship",
   description: "A Twitter clone with project management features",
   icons: {
-    icon: [{ url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32' fill='%23D9361E'>🥬</text></svg>" }],
+    icon: [
+      {
+        url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🥬</text></svg>",
+        type: "image/svg+xml"
+      }
+    ],
+    shortcut: ["data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🥬</text></svg>"],
   },
 };
 
