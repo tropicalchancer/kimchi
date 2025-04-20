@@ -28,9 +28,17 @@ export function useProjectSearch() {
       setError(null)
 
       try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!session) {
+          setProjects([])
+          return
+        }
+
         const { data, error: searchError } = await supabase
           .from('projects')
           .select('id, title, description')
+          .eq('user_id', session.user.id)
           .ilike('title', `%${searchQuery}%`)
           .limit(5)
 

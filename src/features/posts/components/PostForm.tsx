@@ -10,6 +10,7 @@ interface ProjectSuggestion {
   id: string
   title: string
   slug: string
+  user_id: string
 }
 
 export function PostForm() {
@@ -41,13 +42,23 @@ export function PostForm() {
       const searchTerm = hashtagMatch[1].toLowerCase()
       
       if (searchTerm) {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (!session) {
+          setProjectSuggestions([])
+          return
+        }
+
         const { data } = await supabase
           .from('projects')
-          .select('id, title, slug')
+          .select('id, title, slug, user_id')
+          .eq('user_id', session.user.id)
           .or(`title.ilike.${searchTerm}%,slug.ilike.${searchTerm}%`)
           .limit(5)
 
-        setProjectSuggestions(data || [])
+        // Additional safety check to ensure only user's projects are shown
+        const filteredData = data?.filter(project => project.user_id === session.user.id) || []
+        setProjectSuggestions(filteredData)
       } else {
         setProjectSuggestions([])
       }
@@ -83,6 +94,7 @@ export function PostForm() {
           .from('projects')
           .select('id')
           .eq('slug', lastMatch[1])
+          .eq('user_id', session.user.id)
           .single()
         
         if (project) {
