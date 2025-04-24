@@ -9,6 +9,7 @@ import { Modal } from '@/components/Modal'
 interface ProjectFormProps {
   isOpen: boolean
   onClose: () => void
+  onProjectCreated?: (project: any) => void
   project?: {
     id: string
     title: string
@@ -18,7 +19,7 @@ interface ProjectFormProps {
   }
 }
 
-export function ProjectForm({ isOpen, onClose, project }: ProjectFormProps) {
+export function ProjectForm({ isOpen, onClose, onProjectCreated, project }: ProjectFormProps) {
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [description, setDescription] = useState('')
@@ -122,12 +123,19 @@ export function ProjectForm({ isOpen, onClose, project }: ProjectFormProps) {
             description: description.trim()
           })
           .eq('id', project.id)
-          .eq('user_id', session.user.id) // Ensure user owns the project
+          .eq('user_id', session.user.id)
 
         if (projectError) throw projectError
+        
+        // Clear form and close modal after successful update
+        setTitle('')
+        setSlug('')
+        setDescription('')
+        onClose()
       } else {
+        console.log('Creating new project...')
         // Create new project
-        const { error: projectError } = await supabase
+        const { data: newProject, error: projectError } = await supabase
           .from('projects')
           .insert([{
             title: title.trim(),
@@ -135,16 +143,42 @@ export function ProjectForm({ isOpen, onClose, project }: ProjectFormProps) {
             description: description.trim(),
             user_id: session.user.id
           }])
-          .select()
+          .select('*, profiles(*)')
+          .single()
 
-        if (projectError) throw projectError
+        if (projectError) {
+          console.error('Error creating project:', projectError)
+          throw projectError
+        }
+
+        console.log('New project created:', newProject)
+        
+        // Ensure we have the complete project data
+        if (newProject) {
+          const { data: completeProject, error: fetchError } = await supabase
+            .from('projects')
+            .select('*, profiles(*)')
+            .eq('id', newProject.id)
+            .single()
+
+          if (fetchError) {
+            console.error('Error fetching complete project:', fetchError)
+            throw fetchError
+          }
+
+          console.log('Complete project data:', completeProject)
+          
+          if (completeProject && onProjectCreated) {
+            onProjectCreated(completeProject)
+          }
+        }
+
+        // Clear form and close modal after successful creation
+        setTitle('')
+        setSlug('')
+        setDescription('')
+        onClose()
       }
-
-      setTitle('')
-      setSlug('')
-      setDescription('')
-      router.refresh()
-      onClose()
     } catch (err: unknown) {
       console.error('Error saving project:', err)
       if (err instanceof Error) {
@@ -208,12 +242,12 @@ export function ProjectForm({ isOpen, onClose, project }: ProjectFormProps) {
                 type="text"
                 id="slug"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, '-'))}
                 placeholder="project-url"
                 className="block w-full px-0 py-3 text-gray-900 placeholder:text-gray-400 border-0 bg-transparent focus:ring-0"
                 required
-                pattern="[a-z0-9-]+"
-                title="Only lowercase letters, numbers, and hyphens are allowed"
+                pattern="[a-z0-9][a-z0-9-]*[a-z0-9]"
+                title="Only lowercase letters, numbers, and hyphens are allowed. Must start and end with a letter or number."
               />
             </div>
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import Link from 'next/link'
 import { format, isToday, isYesterday, isSameYear } from 'date-fns'
@@ -52,10 +52,28 @@ function groupProjectsByDate(projects: Project[]): { [key: string]: Project[] } 
   return grouped
 }
 
-export function ProjectList() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+interface ProjectListProps {
+  initialProjects?: Project[]
+  onProjectsChange?: (projects: Project[]) => void
+}
+
+export function ProjectList({ initialProjects = [], onProjectsChange }: ProjectListProps) {
+  const [projects, setProjects] = useState<Project[]>(initialProjects)
+  const [isLoading, setIsLoading] = useState(!initialProjects.length)
   const supabase = createClientComponentClient<Database>()
+
+  // Update local state when initialProjects changes
+  useEffect(() => {
+    setProjects(initialProjects)
+  }, [initialProjects])
+
+  const updateProjects = useCallback((newProjects: Project[] | ((prev: Project[]) => Project[])) => {
+    setProjects(prev => {
+      const nextProjects = typeof newProjects === 'function' ? newProjects(prev) : newProjects
+      onProjectsChange?.(nextProjects)
+      return nextProjects
+    })
+  }, [onProjectsChange])
 
   async function fetchProjects() {
     try {
@@ -64,7 +82,9 @@ export function ProjectList() {
         .select('*, profiles(*)')
         .order('created_at', { ascending: false })
 
-      setProjects(data || [])
+      if (data) {
+        updateProjects(data)
+      }
     } catch (error) {
       console.error('Error fetching projects:', error)
     } finally {
@@ -72,63 +92,69 @@ export function ProjectList() {
     }
   }
 
+  // Set up realtime subscription
   useEffect(() => {
-    fetchProjects()
+    // Only fetch if we don't have initial projects
+    if (!initialProjects.length) {
+      fetchProjects()
+    }
 
-    // Subscribe to changes
+    // Set up realtime subscription
     const channel = supabase
       .channel('projects_realtime')
       .on('postgres_changes', {
-        event: 'INSERT',
+        event: '*', // Listen to all events
         schema: 'public',
         table: 'projects'
       }, async (payload) => {
-        // Fetch the complete project with profile data
-        const { data: newProject } = await supabase
-          .from('projects')
-          .select('*, profiles(*)')
-          .eq('id', payload.new.id)
-          .single()
+        console.log('Received realtime event:', payload)
+        
+        // Handle the event based on its type
+        if (payload.eventType === 'INSERT') {
+          const { data: newProject } = await supabase
+            .from('projects')
+            .select('*, profiles(*)')
+            .eq('id', payload.new.id)
+            .single()
 
-        if (newProject) {
-          setProjects(currentProjects => [newProject, ...currentProjects])
-        }
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'projects'
-      }, async (payload) => {
-        // Fetch the updated project with profile data
-        const { data: updatedProject } = await supabase
-          .from('projects')
-          .select('*, profiles(*)')
-          .eq('id', payload.new.id)
-          .single()
+          if (newProject) {
+            updateProjects(current => {
+              // Check if project already exists to prevent duplicates
+              if (current.some(p => p.id === newProject.id)) {
+                return current
+              }
+              return [newProject, ...current]
+            })
+          }
+        } else if (payload.eventType === 'UPDATE') {
+          const { data: updatedProject } = await supabase
+            .from('projects')
+            .select('*, profiles(*)')
+            .eq('id', payload.new.id)
+            .single()
 
-        if (updatedProject) {
-          setProjects(currentProjects =>
-            currentProjects.map(project =>
-              project.id === updatedProject.id ? updatedProject : project
+          if (updatedProject) {
+            updateProjects(current =>
+              current.map(project =>
+                project.id === updatedProject.id ? updatedProject : project
+              )
             )
+          }
+        } else if (payload.eventType === 'DELETE') {
+          updateProjects(current =>
+            current.filter(project => project.id !== payload.old.id)
           )
         }
       })
-      .on('postgres_changes', {
-        event: 'DELETE',
-        schema: 'public',
-        table: 'projects'
-      }, (payload) => {
-        setProjects(currentProjects =>
-          currentProjects.filter(project => project.id !== payload.old.id)
-        )
+      .subscribe((status) => {
+        console.log('Subscription status:', status)
       })
-      .subscribe()
 
     return () => {
+      console.log('Cleaning up realtime subscription')
       supabase.removeChannel(channel)
     }
-  }, [supabase])
+  }, [supabase, updateProjects, initialProjects.length]) // Only depend on initialProjects.length
 
   if (isLoading) {
     return (

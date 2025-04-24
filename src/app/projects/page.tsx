@@ -1,26 +1,87 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import { ProjectForm, ProjectList } from '@/features/projects'
+import type { Database } from '@/lib/database.types'
+
+type Project = Database['public']['Tables']['projects']['Row'] & {
+  profiles: Database['public']['Tables']['profiles']['Row']
+}
 
 export default function ProjectsPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const supabase = createClientComponentClient()
+  const [projects, setProjects] = useState<Project[]>([])
+  const supabase = createClientComponentClient<Database>()
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/auth')
+  // Fetch initial projects
+  const fetchProjects = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*, profiles(*)')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching projects:', error)
+        return
       }
-      setIsLoading(false)
+
+      console.log('Fetched projects:', data)
+      setProjects(data || [])
+    } catch (error) {
+      console.error('Error fetching projects:', error)
     }
-    checkUser()
-  }, [router, supabase.auth])
+  }, [supabase])
+
+  // Check authentication and load initial data
+  useEffect(() => {
+    const checkUserAndLoadProjects = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Auth error:', error)
+          router.push('/auth')
+          return
+        }
+        
+        if (!session) {
+          console.log('No session found, redirecting to auth')
+          router.push('/auth')
+          return
+        }
+
+        console.log('User authenticated, fetching projects')
+        await fetchProjects()
+      } catch (error) {
+        console.error('Error in initialization:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    checkUserAndLoadProjects()
+  }, [router, supabase, fetchProjects])
+
+  const handleProjectCreated = useCallback(async (newProject: Project) => {
+    console.log('Project created, updating state:', newProject)
+    setProjects(prev => {
+      // Check if project already exists
+      if (prev.some(p => p.id === newProject.id)) {
+        return prev
+      }
+      return [newProject, ...prev]
+    })
+  }, [])
+
+  const handleProjectsChange = useCallback((updatedProjects: Project[]) => {
+    console.log('Projects updated:', updatedProjects)
+    setProjects(updatedProjects)
+  }, [])
 
   if (isLoading) {
     return (
@@ -42,8 +103,15 @@ export default function ProjectsPage() {
         </button>
       </div>
 
-      <ProjectForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <ProjectList />
+      <ProjectForm 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onProjectCreated={handleProjectCreated}
+      />
+      <ProjectList 
+        initialProjects={projects} 
+        onProjectsChange={handleProjectsChange}
+      />
     </div>
   )
 } 
