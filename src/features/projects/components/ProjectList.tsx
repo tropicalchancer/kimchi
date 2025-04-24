@@ -167,11 +167,8 @@ export function ProjectList() {
                   <p className="mt-2 text-gray-600">
                     {project.description}
                   </p>
-                  <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+                  <div className="mt-4 flex items-center text-sm text-gray-500">
                     <span>Created by {project.profiles?.full_name || 'Anonymous'}</span>
-                    <time dateTime={project.created_at}>
-                      {format(new Date(project.created_at), 'h:mm a')}
-                    </time>
                   </div>
                 </div>
               </Link>
