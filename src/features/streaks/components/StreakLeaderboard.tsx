@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { differenceInDays, parseISO, startOfDay } from 'date-fns'
+import Link from 'next/link'
 
 interface UserStreak {
   username: string
@@ -124,20 +125,25 @@ export function StreakLeaderboard() {
             <div className="flex items-center space-x-3">
               <div className="w-6 text-sm text-gray-500">#{index + 1}</div>
               <div className="flex items-center">
-                {user.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt={user.username}
-                    className="h-6 w-6 rounded-full mr-2"
-                  />
-                ) : (
-                  <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 text-xs font-medium mr-2">
-                    {user.username.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <span className="text-sm font-medium text-gray-900">
+                <Link href={`/user/${user.username}`}>
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.username}
+                      className="h-6 w-6 rounded-full mr-2 cursor-pointer"
+                    />
+                  ) : (
+                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 text-xs font-medium mr-2 cursor-pointer">
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </Link>
+                <Link 
+                  href={`/user/${user.username}`}
+                  className="text-sm font-medium text-gray-900 hover:underline"
+                >
                   {user.username}
-                </span>
+                </Link>
               </div>
             </div>
             <div className="flex items-center text-orange-500">

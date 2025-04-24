@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+use best practices as a software engineer. don't break any other unrelated functionality  to the task at hand. Keep things simple. 
+
+A common bug to avoid: don't break functionality of connecting tasks to projects with #. This has broken a few times in the past. 

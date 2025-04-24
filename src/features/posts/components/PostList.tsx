@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { formatDistanceToNow } from 'date-fns'
 import { PostContent } from './PostContent'
+import Link from 'next/link'
 
 interface Profile {
   username: string
@@ -146,23 +147,30 @@ export function PostList() {
         <div key={post.id} className="p-4">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0">
-              {post.profiles.avatar_url ? (
-                <img
-                  src={post.profiles.avatar_url}
-                  alt={post.profiles.username}
-                  className="h-10 w-10 rounded-full"
-                />
-              ) : (
-                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 font-medium">
-                    {post.profiles.username.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <Link href={`/user/${post.profiles.username}`}>
+                {post.profiles.avatar_url ? (
+                  <img
+                    src={post.profiles.avatar_url}
+                    alt={post.profiles.username}
+                    className="h-10 w-10 rounded-full cursor-pointer"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
+                    <span className="text-gray-500 font-medium">
+                      {post.profiles.username.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </Link>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-base font-medium text-gray-900">
-                {post.profiles.username}
+                <Link
+                  href={`/user/${post.profiles.username}`}
+                  className="hover:underline"
+                >
+                  {post.profiles.username}
+                </Link>
               </p>
               <p className="text-base text-gray-500">
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
