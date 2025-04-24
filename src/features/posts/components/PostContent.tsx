@@ -84,6 +84,7 @@ export function PostContent({ content, projectId, projectTitle, projectSlug }: P
 
   return (
     <p className="text-lg text-gray-800 whitespace-pre-wrap">
+      <span className="mr-2">✅</span>
       {renderedContent}
     </p>
   )

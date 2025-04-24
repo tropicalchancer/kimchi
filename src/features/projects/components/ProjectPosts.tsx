@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface ProjectPost {
   id: string
@@ -113,7 +114,11 @@ export function ProjectPosts({ projectId }: ProjectPostsProps) {
                   </div>
                 )}
                 <div>
-                  <div className="font-medium text-gray-900">{post.profiles?.username || 'Unknown User'}</div>
+                  <div className="font-medium text-gray-900">
+                    <Link href={`/user/${post.profiles?.username}`} className="hover:underline text-[#D9361E]">
+                      {post.profiles?.username || 'Unknown User'}
+                    </Link>
+                  </div>
                 </div>
               </div>
               <p className="text-gray-800">{post.content}</p>

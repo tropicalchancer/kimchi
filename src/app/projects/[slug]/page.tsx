@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import type { Database } from '@/lib/database.types'
 import { ProjectActions } from './ProjectActions'
+import Link from 'next/link'
 
 // Project emojis that represent different types of work
 const PROJECT_EMOJIS = ['📝', '🎨', '💻', '📚', '🔧', '🎯', '⚡️', '🚀', '💡', '🛠️', '📊', '🎮', '🔬', '📱', '🎵']
@@ -62,7 +63,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   {isOwner && <ProjectActions project={project} />}
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
-                  <span>Created by {project.profiles.username}</span>
+                  <span>Created by <Link href={`/user/${project.profiles.username}`} className="text-[#D9361E] hover:underline">{project.profiles.username}</Link></span>
                   <span className="mx-2">•</span>
                   <time dateTime={project.created_at}>
                     {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
