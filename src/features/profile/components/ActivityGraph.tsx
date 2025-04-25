@@ -89,18 +89,7 @@ export function ActivityGraph({ userId }: ActivityGraphProps) {
 
   return (
     <div className="bg-white rounded-lg p-4 border border-gray-200">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-medium text-gray-900">Activity</h3>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span>Less</span>
-          <div className="w-2.5 h-2.5 bg-gray-100 rounded-sm"></div>
-          <div className="w-2.5 h-2.5 bg-green-200 rounded-sm"></div>
-          <div className="w-2.5 h-2.5 bg-green-300 rounded-sm"></div>
-          <div className="w-2.5 h-2.5 bg-green-400 rounded-sm"></div>
-          <div className="w-2.5 h-2.5 bg-green-500 rounded-sm"></div>
-          <span>More</span>
-        </div>
-      </div>
+      <h3 className="text-base font-medium text-gray-900 mb-4">Activity</h3>
       <div className="w-full overflow-x-auto">
         <div className="inline-flex gap-[3px] min-w-full">
           {weeks.map((week, weekIndex) => (
