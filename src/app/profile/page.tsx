@@ -7,6 +7,7 @@ import { supabase } from '@/lib/api/supabase/client'
 import { Post, Profile, Project } from '@/shared/types/database'
 import { formatDistanceToNow } from 'date-fns'
 import { ProfileActions } from '@/features/profile/components/ProfileActions'
+import { ActivityGraph } from '@/features/profile/components/ActivityGraph'
 
 interface ExtendedPost extends Post {
   image_url?: string | null
@@ -135,6 +136,11 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Activity Graph */}
+      <div className="mb-6">
+        <ActivityGraph userId={profile.id} />
       </div>
 
       {/* Content Grid */}
