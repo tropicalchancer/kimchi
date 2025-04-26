@@ -1,4 +1,5 @@
-import { useZupassAuth } from './zupassAuth';
+import { useZupassAuth } from '../../lib/auth/zupassAuth';
+
 
 export default function AuthComponent() {
   const { user, login, logout, isLoading, error } = useZupassAuth();

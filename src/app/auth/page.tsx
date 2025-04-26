@@ -6,6 +6,8 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import ZupassButton from '@/components/Auth/ZupassButton';
+
 
 export default function AuthPage() {
   const router = useRouter()
@@ -100,6 +102,10 @@ export default function AuthPage() {
             redirectTo={redirectUrl}
             theme="default"
           />
+          <div className="mt-6 flex justify-center">
+    <ZupassButton />
+  </div>
+
         </div>
       </div>
     </div>
