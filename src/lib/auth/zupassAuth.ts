@@ -1,27 +1,19 @@
 'use client'
 
-/* ────────────────────────────────────────────────────────────────────
-   useZupassAuth hook  🚀
-   -------------------------------------------------------------------
-   Handles the entire Zupass → Kimchi login lifecycle:
-
-     1. GET /api/auth/zupass        → receive a nonce
-     2. Open Zupass popup           → user signs proof (PCD)
-     3. POST PCD back to the API    → API verifies + upserts Supabase
-     4. Expose { user, login, … }   → any UI can consume the state
-     5. Redirect to /feed on success
-   ----------------------------------------------------------------- */
+/**********************************************************************
+ *  useZupassAuth hook   —  Zupass + Supabase session
+ *********************************************************************/
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useZuAuth } from 'zuauth';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { EdDSATicketFieldsToReveal } from '@pcd/zk-eddsa-event-ticket-pcd';
 
 /* ────────────────  CONFIG  ─────────────────────────────────────── */
 
-const ZUPASS_URL = 'https://zupass.org'; // reserved for future customisation
+const supabase = createClientComponentClient();
 
-// What parts of the ticket we want Zupass to reveal
 const defaultTicketFields: EdDSATicketFieldsToReveal = {
   revealTicketId:            false,
   revealEventId:             true,
@@ -39,34 +31,29 @@ const defaultTicketFields: EdDSATicketFieldsToReveal = {
 /* ────────────────  HOOK  ───────────────────────────────────────── */
 
 export function useZupassAuth() {
-  const router = useRouter();                 // client-side navigation helper
-  const { authenticate, pcd } = useZuAuth();  // Zupass helper
+  const router = useRouter();
+  const { authenticate, pcd } = useZuAuth();
 
   const [user,      setUser]      = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState<string | null>(null);
 
-  /* ---------------------------------------------------------------
-     If zuauth emits a freshly-signed PCD, verify it immediately
-  ----------------------------------------------------------------*/
+  /*  handle proof whenever the popup sends it back */
   useEffect(() => {
-    if (pcd) void handleLogin(pcd);
+    if (pcd) void verifyPCD(pcd);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pcd]);
 
-  /* ─────────────  LOGIN BUTTON HANDLER  ───────────────────────── */
+  /* ─────────────  LOGIN  ───────────────────────── */
 
   const login = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setIsLoading(true); setError(null);
 
-      /* 1. Ask our API for a nonce (anti-replay) */
       const r = await fetch('/api/auth/zupass', { method: 'GET' });
       const { nonce } = await r.json();
 
-      /* 2. Launch Zupass popup */
-      authenticate(defaultTicketFields, nonce);
+      authenticate(defaultTicketFields, nonce);   // opens popup
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to login');
     } finally {
@@ -74,33 +61,26 @@ export function useZupassAuth() {
     }
   };
 
-  /* ─────────────  VERIFY PCD WITH BACKEND  ────────────────────── */
+  /* ─────────────  VERIFY & SET SESSION  ───────────────────────── */
 
-  const handleLogin = async (pcd: string) => {
+  const verifyPCD = async (pcd: string) => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setIsLoading(true); setError(null);
 
-      /* 3. Send proof to backend for verification */
       const res = await fetch('/api/auth/zupass', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ pcd })
+        body:   JSON.stringify({ pcd })
       });
       if (!res.ok) throw new Error('Authentication failed');
 
-      const { user } = await res.json();
-      setUser(user);
+      const { user, access_token, refresh_token } = await res.json();
 
-      /* 4. 🚀 Redirect to /feed
-            First attempt a soft push; if something blocks it,
-            fall back to a hard reload so the user still lands there. */
-      try {
-        router.push('/feed');
-      } finally {
-        // hard redirect is a no-op if the soft push already succeeded
-        window.location.assign('/feed');
-      }
+      /* store Supabase session locally */
+      await supabase.auth.setSession({ access_token, refresh_token });
+
+      setUser(user);
+      router.push('/feed');          // guards now succeed
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to verify authentication');
     } finally {
@@ -108,14 +88,13 @@ export function useZupassAuth() {
     }
   };
 
-  /* ─────────────  LOGOUT  ─────────────────────────────────────── */
+  /* ─────────────  LOGOUT  ───────────────────────── */
 
   const logout = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-
+      setIsLoading(true); setError(null);
       await fetch('/api/auth/zupass', { method: 'DELETE' });
+      await supabase.auth.signOut();
       setUser(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to logout');
@@ -123,8 +102,6 @@ export function useZupassAuth() {
       setIsLoading(false);
     }
   };
-
-  /* ─────────────  PUBLIC API  ─────────────────────────────────── */
 
   return { user, login, logout, isLoading, error };
 }
