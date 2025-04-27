@@ -1,16 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable React strict mode for better development practices
+  // Runtime-only features (works in 13 → 14 without the deprecated flag)
   reactStrictMode: true,
-  // Disable automatic static optimization for pages that need to be dynamic
-  experimental: {
-    // Enable app directory
-    appDir: true,
-  },
-  // Configure allowed image domains
+
+  // App Router is on by default as of Next 14 – no need for experimental.appDir
   images: {
     domains: ['opiwlgojctrvwnuycerk.supabase.co'],
   },
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig;
