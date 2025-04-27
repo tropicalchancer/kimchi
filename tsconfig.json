@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    /* ───────── existing settings ───────── */
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -13,15 +14,24 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+
+    /* next-js plugin */
+    "plugins": [{ "name": "next" }],
+
+    /* path alias */
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    /* ───────── added line (fixes Vercel build) ───────── */
+    "types": ["@types/styled-components", "node"] // ← force-include
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }
