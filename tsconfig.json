@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     /* ───────── existing settings ───────── */
-    "target": "ES2020",
+    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": false,
@@ -20,16 +20,9 @@
 
     /* path alias */
     "paths": {
-      "@/*": ["./src/*"],
-      "styled-components": ["./node_modules/styled-components"],
-      "styled-components/*": ["./node_modules/styled-components/*"]
+      "@/*": ["./src/*"]
     },
 
-    /* ───────── added line (fixes Vercel build) ───────── */
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/styled-components"
-    ],
     "types": ["node"]
   },
 
