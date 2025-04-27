@@ -7,6 +7,7 @@ import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ZupassButton from '@/components/Auth/ZupassButton';
+import EmailPasswordAuth from '@/components/Auth/EmailPasswordAuth';
 
 
 export default function AuthPage() {
@@ -57,55 +58,10 @@ export default function AuthPage() {
           Join our cozy community of makers and collaborators
         </p>
         <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
-          <Auth
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#D9361E',
-                    brandAccent: '#B22D19',
-                    inputBackground: 'white',
-                    inputText: '#111827',
-                    inputBorder: '#E5E7EB',
-                    inputBorderHover: '#D9361E',
-                    inputBorderFocus: '#D9361E',
-                  },
-                },
-              },
-              style: {
-                button: {
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  padding: '8px 16px',
-                },
-                input: {
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  padding: '8px 12px',
-                },
-                anchor: {
-                  color: '#D9361E',
-                },
-              },
-            }}
-            localization={{
-              variables: {
-                sign_in: {
-                  social_provider_text: "Continue with Zupass"
-                }
-              }
-            }}
-            providers={['github']}
-            redirectTo={redirectUrl}
-            theme="default"
-          />
-          <div className="mt-6 flex justify-center">
-    <ZupassButton />
-  </div>
-
+          <div className="mb-6 flex justify-center">
+            <ZupassButton />
+          </div>
+          <EmailPasswordAuth supabase={supabase} redirectUrl={redirectUrl} />
         </div>
       </div>
     </div>

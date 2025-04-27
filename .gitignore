@@ -34,3 +34,7 @@ kimchi.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# project specific 
+features.mdc
+projectoverview.mdc 
