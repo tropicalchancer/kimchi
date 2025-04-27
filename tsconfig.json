@@ -20,10 +20,16 @@
 
     /* path alias */
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "styled-components": ["./node_modules/styled-components"],
+      "styled-components/*": ["./node_modules/styled-components/*"]
     },
 
     /* ───────── added line (fixes Vercel build) ───────── */
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/styled-components"
+    ],
     "types": ["node", "@types/styled-components"]
   },
 
@@ -31,8 +37,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "styled-components.d.ts"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

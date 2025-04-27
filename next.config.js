@@ -7,6 +7,11 @@ const nextConfig = {
   images: {
     domains: ['opiwlgojctrvwnuycerk.supabase.co'],
   },
+
+  transpilePackages: ['@pcd/passport-ui', 'styled-components'],
+  typescript: {
+    ignoreBuildErrors: false,
+  },
 };
 
 module.exports = nextConfig;
