@@ -49,7 +49,7 @@ export default function HomePage() {
             </div>
             
             <div className="bg-white rounded-xl p-8 mb-8 shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-4">Kimchi is a cozy community for makers.</h2>
+              <h2 className="text-xl font-semibold mb-4">kimchi is a calm zone for makers.</h2>
               <p className="text-gray-700 mb-6">
                 We celebrate wins, provide support during challenges, and maintain gentle accountability 
                 while creating meaningful progress on our projects.
@@ -65,9 +65,9 @@ export default function HomePage() {
           
           <div className="relative">
             <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100">
-              <h3 className="text-2xl font-bold text-[#D9361E] mb-4">Curious minds, building tomorrow—together.</h3>
+              <h3 className="text-2xl font-bold text-[#D9361E] mb-4">curious minds, building tomorrow—together.</h3>
               <p className="text-gray-600 mb-8">
-                Hackers, devs, and researchers converge to invent a more human-centric AI age.
+                Hackers, devs, and researchers converge to ship stuff.
               </p>
               
               <div className="space-y-6">
@@ -76,8 +76,8 @@ export default function HomePage() {
                     <span className="text-2xl">🚀</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Habit-stack for output</h4>
-                    <p className="text-gray-600">Build with driven makers.</p>
+                    <h4 className="font-semibold mb-1">habit-stack for output</h4>
+                    <p className="text-gray-600">build with driven makers.</p>
                   </div>
                 </div>
                 
@@ -86,8 +86,8 @@ export default function HomePage() {
                     <span className="text-2xl">💡</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Braintrust on tap</h4>
-                    <p className="text-gray-600">Co-create with others in the Zuzalu realm.</p>
+                    <h4 className="font-semibold mb-1">braintrust on tap</h4>
+                    <p className="text-gray-600">co-create with others in the Zuzalu realm.</p>
                   </div>
                 </div>
                 
@@ -96,8 +96,8 @@ export default function HomePage() {
                     <span className="text-2xl">✅</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Accountability that sticks</h4>
-                    <p className="text-gray-600">Log wins, course-correct together.</p>
+                    <h4 className="font-semibold mb-1">accountability that sticks</h4>
+                    <p className="text-gray-600">log wins, course-correct together.</p>
                   </div>
                 </div>
               </div>
