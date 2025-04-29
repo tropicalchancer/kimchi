@@ -13,8 +13,7 @@ export function ImageUpload({ onImageUploaded, onError }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const supabase = createClientComponentClient()
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleFile = async (file: File) => {
     if (!file) return
 
     // Validate file type
@@ -52,6 +51,13 @@ export function ImageUpload({ onImageUploaded, onError }: ImageUploadProps) {
       onError('Failed to upload image')
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleFile(file)
     }
   }
 

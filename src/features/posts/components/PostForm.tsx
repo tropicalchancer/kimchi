@@ -5,6 +5,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ImageUpload } from './ImageUpload'
+import { v4 as uuidv4 } from 'uuid'
 
 interface ProjectSuggestion {
   id: string
@@ -20,6 +21,7 @@ export function PostForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [projectSuggestions, setProjectSuggestions] = useState<ProjectSuggestion[]>([])
   const [cursorPosition, setCursorPosition] = useState<number | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const router = useRouter()
   const supabase = createClientComponentClient()
 
@@ -147,9 +149,95 @@ export function PostForm() {
     setError(errorMessage)
   }
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX
+    const y = e.clientY
+
+    // Only set isDragging to false if we've actually left the element
+    if (
+      x <= rect.left ||
+      x >= rect.right ||
+      y <= rect.top ||
+      y >= rect.bottom
+    ) {
+      setIsDragging(false)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.type.startsWith('image/')) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image must be less than 5MB')
+        return
+      }
+
+      try {
+        // Upload image to Supabase Storage
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${uuidv4()}.${fileExt}`
+        const { data, error: uploadError } = await supabase.storage
+          .from('post-images')
+          .upload(fileName, file)
+
+        if (uploadError) throw uploadError
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(fileName)
+
+        setImageUrl(publicUrl)
+        setError(null)
+      } catch (error) {
+        console.error('Error uploading image:', error)
+        setError('Failed to upload image')
+      }
+    } else if (file) {
+      setError('Please drop an image file')
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="rounded-lg border border-gray-200 relative">
+      <div 
+        className={`rounded-lg border border-gray-200 relative ${
+          isDragging ? 'border-2 border-dashed border-gray-300 bg-gray-50' : ''
+        }`}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
+        {isDragging && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-90 z-10">
+            <div className="text-gray-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              Drop image here
+            </div>
+          </div>
+        )}
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
